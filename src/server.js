@@ -10,4 +10,4 @@ app.use(studentRoutes);
 app.use((reg,res) =>
     res.status(404).send('Not Found'))
 
-export default app;
+app.listen(port, () => console.log(`Server running on port ${port}`));
