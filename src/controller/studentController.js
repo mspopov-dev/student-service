@@ -68,6 +68,7 @@ export const addScore = async (req, res) => {
         })
     }
 }
+
 export const findStudentsByName = async (req, res) => {
     const students = await service.findStudentsByName(req.params.name);
     return res.json(students);
@@ -79,6 +80,9 @@ export const countStudentsByNames = async (req, res) => {
 }
 
 export const findStudentsByMinScore = async (req, res) => {
-    const students = await service.findStudentsByMinScore(req.params.exam, req.params.minScore);
+    const students = await service.findStudentsByMinScore(
+        req.params.exam,
+        req.params.minScore
+    );
     return res.json(students);
 }
