@@ -1,50 +1,19 @@
-import Student from "../model/student.js";
+import Student from '../model/student.js';
 
-const students = new Map();
-let collection;
+export const createStudent = student => Student.create(student);
 
-export const init = db => collection = db.collection('college');
+export const findStudentById = id => Student.findById(id).select({password: 0}).exec();
 
-export const createStudent = async ({id, name, password}) => {
-    const existingStudent = await collection.findOne({_id: id});
-    if (existingStudent) {
-        return false;
-    }
-    await collection.insertOne({_id: id, name, password, scores: {}});
-    return true;
-};
+export const deleteStudent = id => Student.findByIdAndDelete(id).select({password: 0}).exec();
 
-export const findStudentById = async id =>
-    await collection.findOne({_id: id}, {projection: {password: 0}});
+export const updateStudent = (id, data) => Student.findByIdAndUpdate(id, data, {returnDocument: 'after'}).select({scores: 0}).exec();
 
-export const deleteStudent = async id =>
-    await collection.findOneAndDelete({_id: id}, {projection: {password: 0}});
 
-export const updateStudent = async (id, data) =>
-    await collection.findOneAndUpdate(
-        {_id: id},
-        {$set: data},
-        {projection: {scores: 0}, returnDocument: 'after'}
-    );
+export const findStudentsByName = name => Student.find({name: new RegExp(`^${name}$`, 'i')}).select({password: 0}).exec();
 
-export const findStudentsByName = async name =>
-    await collection.find(
-        {name: {$regex: `^${name}$`, $options: 'i'}},
-        {projection: {password: 0}}
-    ).toArray();
+export const countStudentsByNames = names => {
+    const regexConditions = names.map(name => ({name: {$regex: `^${name}$`, $options: 'i'}}));
+    return Student.countDocuments({$or: regexConditions});
+}
 
-export const countStudentsByNames = async names => {
-    // HW1: поиск имён без учёта регистра.
-    const namePatterns = names.map(name => {
-        const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return new RegExp(`^${escapedName}$`, 'i');
-    });
-
-    return await collection.countDocuments({name: {$in: namePatterns}});
-};
-
-export const findStudentsByMinScore = async (exam, minScore) =>
-    await collection.find(
-        {[`scores.${exam}`]: {$gte: minScore}},
-        {projection: {password: 0}}
-    ).toArray();
+export const findStudentsByMinScore = (exam, minScore) => Student.find({[`scores.${exam}`]: {$gte: minScore}}).select({password: 0}).exec();
